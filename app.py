@@ -4,12 +4,16 @@ import pandas as pd
 # sidebar elements
 st.sidebar.write("Settings")
 
-cat_algorithm = st.sidebar.selectbox(label="Select distance metric",
+distance_metric = st.sidebar.selectbox(label="Select distance metric",
                                      options=['normalised compressed distance',
                                               'lempel-ziv jaccard distance'])
-num_algorithm = st.sidebar.selectbox(label="Select classification algorithm",
+classification_algo = st.sidebar.selectbox(label="Select classification algorithm",
                                      options=['knn + compressor',
                                               'cross entropy + compressor'])
+
+if classification_algo == 'knn + compressor':
+    n_neighbours = st.sidebar.number_input(label="Input number of neighbours", min_value=1,
+                                           value=5, step=1)
 
 # main page
 st.title("Compressor based text classification")

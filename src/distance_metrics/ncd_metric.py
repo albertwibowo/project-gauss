@@ -1,4 +1,4 @@
-# from src.abstract.distance_base import DistanceBase
+from src.abstract.distance_base import DistanceBase
 # normalised compression distance
 
 def calculate_ncd(cx1: int, cx2: int, cx1cx2: int):
@@ -19,11 +19,11 @@ def calculate_ncd(cx1: int, cx2: int, cx1cx2: int):
     """
     return ((cx1cx2 - min(cx1, cx2)) / max(cx1, cx2))
 
-# class NcdMetric(DistanceBase):
+class NcdMetric(DistanceBase):
 
-#     def __init__(self):
-#         ...
+    def __init__(self):
+        ...
 
-#     def calculate(self, cx1: int, 
-#                   cx2: int, cx1cx2: int):
-#         return ((cx1cx2 - min(cx1, cx2)) / max(cx1, cx2))
+    def calculate(self, cx1: int, 
+                  cx2: int, cx1cx2: int):
+        return ((cx1cx2 - min(cx1, cx2)) / max(cx1, cx2))
