@@ -1,12 +1,14 @@
 import streamlit as st 
 import pandas as pd 
+from src.algorithms.knn_compressor import KnnCompressor
+from src.algorithms.ce_compressor import CeCompressor
+from src.utils.general_utils import save_data
 
 # sidebar elements
 st.sidebar.write("Settings")
 
 distance_metric = st.sidebar.selectbox(label="Select distance metric",
-                                     options=['normalised compressed distance',
-                                              'lempel-ziv jaccard distance'])
+                                     options=['normalised compressed distance'])
 classification_algo = st.sidebar.selectbox(label="Select classification algorithm",
                                      options=['knn + compressor',
                                               'cross entropy + compressor'])
@@ -19,25 +21,25 @@ if classification_algo == 'knn + compressor':
 st.title("Compressor based text classification")
 st.markdown(
     """
-The following app can be used to detect simple data drift.
+The following app can be used to classify text.
 Two dataframes must be uploaded in order for the app to function:
 
-* reference dataframe: this is the source of truth
-* target dataframe: this is the dataframe to be investigated
+* base dataframe: this is the "training" dataframe
+* to-predict dataframe: this is the dataframe to be predicted
 
 """)
 
 
-tab0, tab1, tab2 = st.tabs(["Guidelines", "Data", "Analysis"])
+tab0, tab1, tab2 = st.tabs(["Guidelines", "Data", "Theory"])
 
 # Tab 0 - Guidelines
 
 tab0.subheader("Algorithm setting")
 tab0.markdown(
     """
-* **P-value threshold**: This threshold is used to decide the drift threshold - any p-value below the threshold will result in the features being flagged
-* **Categorical column algorithm**: This will choose the algorithm used to detect drift in categorical columns- it can only use chi-square test for now.
-* **Numerical column algorithm**: This will choose the algorithm used to detect drift in numerical columns- it can only use kolmogorov-smirnov test for now.
+* **Distance Metric**: Distance metric used to measure how different the compressed texts are - only support normalised compressed distance at the moment.
+* **Classification algorithm**: Classification algorithm used to classify texts.
+* **Input number of neighbours**: Number of neighbours if KNN + compressed is chosen.
 """
 )
 
@@ -63,26 +65,66 @@ tab0.markdown(
 # Tab 1 - Data 
 
 tab1.markdown("###### Upload dataframes")
-target_file = tab1.file_uploader("Choose a target dataframe")
-reference_file = tab1.file_uploader("Choose a reference dataframe")
+to_predict_file = tab1.file_uploader("Choose to-predict dataframe")
+base_file = tab1.file_uploader("Choose base dataframe")
 
-if target_file is not None and reference_file is not None:
-    target_df = pd.read_csv(target_file)
-    reference_df = pd.read_csv(reference_file)
+if to_predict_file is not None and base_file is not None:
+    to_predict_df = pd.read_csv(to_predict_file)
+    base_df = pd.read_csv(base_file)
 
+    tab1.markdown("##### Base dataframe")
+    tab1.dataframe(base_df)
 
-    tab1.markdown("###### Target dataframe")
+    tab1.markdown("##### To predict dataframe")
+    tab1.dataframe(to_predict_df)
 
-    tab1.markdown("###### reference dataframe")
+    text_col = tab1.selectbox(label="Please select a text column", 
+                              options=base_df.columns)
+    target_col = tab1.selectbox(label="Please select a class column", 
+                                options=base_df.columns)
+    sample_frac = tab1.slider(label="Sample base dataframe?", 
+                               min_value=0.05, 
+                               max_value=1.0, 
+                               step=0.05,
+                               value=0.2)
 
+    if text_col and target_col:
 
-    tab1.markdown("###### Column types")
+        run_button = tab1.button(label="Run algorithm", key="session_button")
+        if run_button:
+            
+            if classification_algo == 'cross entropy + compressor':
+                algo = CeCompressor(base_df=base_df,
+                        to_predict_df=to_predict_df)
+                result_df = algo.run(text_col=text_col, 
+                                    target_col=target_col,
+                                    sample_frac=sample_frac)
+            
+            elif classification_algo == 'knn + compressor':
+                algo = KnnCompressor(base_df=base_df,
+                        to_predict_df=to_predict_df)
+                result_df = algo.run(text_col=text_col, 
+                                     target_col=target_col,
+                                     k=n_neighbours,
+                                     sample_frac=sample_frac)
+            
+            else:
+                pass
 
-# Tab 2 - Analysis
+            tab1.markdown("##### Prediction result")
+            tab1.dataframe(result_df)
 
-if target_file is not None and reference_file is not None:
-    tab2.markdown("###### Analysis result")
+            tab1.download_button(label="download", 
+                                       data=result_df.to_csv(index=False), 
+                                       file_name="prediction.csv",
+                                       mime="text/csv")
+                
 
-    tab2.markdown("###### Visualisation")
+# Tab 2 - Theory
+
+if to_predict_file is not None and base_file is not None:
+    tab2.markdown("###### Prediction result")
+    # tab2.dataframe(algo.final_predict_result)
+
 
     

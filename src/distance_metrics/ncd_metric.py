@@ -1,7 +1,7 @@
-from src.abstract.distance_base import DistanceBase
-# normalised compression distance
+import gzip
 
-def calculate_ncd(cx1: int, cx2: int, cx1cx2: int):
+
+def calculate_ncd(text1:str, text2:str) -> float:
     """Function to calculate normalised compression distance.
 
     The distance measure the 'effort' needed to change one
@@ -10,20 +10,17 @@ def calculate_ncd(cx1: int, cx2: int, cx1cx2: int):
     to the same class as text A.
 
     Args:
-        cx1 (int): Length of compressed text - text to be classifed.
-        cx2 (int): Length of compressed text - reference text.
-        cx1cx2 (int): Combined length of cx1 and cx2. 
+        text1 (str): A text.
+        text2 (str): A text.
 
     Returns:
         distance (float): Normalised compression distance 
     """
-    return ((cx1cx2 - min(cx1, cx2)) / max(cx1, cx2))
+    text1 = str(text1)
+    text2 = str(text2)
+    combined_text = "".join([text1, text2])
+    c_text1 = len(gzip.compress(text1.encode()))
+    c_text2 = len(gzip.compress(text2.encode()))
+    c_combined = len(gzip.compress(combined_text.encode()))
 
-class NcdMetric(DistanceBase):
-
-    def __init__(self):
-        ...
-
-    def calculate(self, cx1: int, 
-                  cx2: int, cx1cx2: int):
-        return ((cx1cx2 - min(cx1, cx2)) / max(cx1, cx2))
+    return ((c_combined - min(c_text1, c_text2)) / max(c_text1, c_text2))

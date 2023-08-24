@@ -1,33 +1,58 @@
 from typing import Any
 from src.abstract.algorithm_base import AlgorithmBase
-# from src.abstract.distance_base import DistanceBase
 from src.distance_metrics.ce_metric import calculate_ce
 
 import numpy as np 
+import pandas as pd 
+from statistics import mode 
+import multiprocessing as mp
+import itertools
 
 # TODO: add run method
 class CeCompressor(AlgorithmBase):
 
-    def __init__(self, compressor: Any,
-                #  distance_metric: DistanceBase,
-                 train_array: np.array,
-                 test_array: np.array,
-                 to_predict_array: np.array):
+    def __init__(self,
+                 base_df: pd.DataFrame,
+                 to_predict_df: pd.DataFrame):
         
-        self.compressor = compressor
-        # self.dm = distance_metric
-        self.train_array = train_array
-        self.test_array = test_array
-        self.to_predict_array = to_predict_array
+        self.base_df = base_df
+        self.to_predict_df = to_predict_df
 
-        self.final_predict_result = None 
-        self.test_predict_result = None 
 
-    def run(self):
-        ... 
+    def run(self, text_col:str, target_col:str, sample_frac:float=1.0):
 
-    def validate(self):
-        ...
+        temp_df = self.base_df.groupby(target_col).apply(lambda x: x.sample(frac=sample_frac)).reset_index(drop=True)
+        temp_df[text_col] = temp_df[text_col].astype('str')
+        to_predict_list = self.to_predict_df[text_col].values.tolist()
+        
+        base_df_list = [d for _, d in temp_df.groupby(target_col)]
+        base_list = [' '.join(df[text_col]) for df in base_df_list]
+
+        # all combination of text
+        text_list = [x for x in itertools.product(to_predict_list, base_list)]
+
+        # holder for result 
+        preds = []
+        distance = []
+        
+        # multiprocessing
+        pool = mp.Pool(mp.cpu_count())
+        for d in pool.starmap(calculate_ce, text_list, chunksize=5):
+            distance.append(d)
+        pool.close()
+
+        # function to chunk distance data per item to be predicted
+        chunking = lambda lst, sz: [lst[i:i+sz] for i in range(0, len(lst), sz)]
+        chunks = chunking(distance, len(base_list))
+        for i in range(len(chunks)):
+            sorted_idx = np.argsort(np.array(chunks[i]))
+            pred = self.base_df.reset_index(drop=True).loc[sorted_idx[:1], target_col]
+            preds.append(mode(pred))
+        
+        result_df = self.to_predict_df
+        result_df['prediction'] = preds
+
+        return result_df
 
     def save(self):
         ...

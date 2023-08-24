@@ -10,9 +10,5 @@ class AlgorithmBase(ABC):
         ...
 
     @abstractmethod
-    def validate(self):
-        ...
-
-    @abstractmethod
     def save(self):
         ...
