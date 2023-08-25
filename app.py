@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd 
 from src.algorithms.knn_compressor import KnnCompressor
 from src.algorithms.ce_compressor import CeCompressor
-from src.utils.general_utils import save_data
 
 # sidebar elements
 st.sidebar.write("Settings")
@@ -37,9 +36,10 @@ tab0, tab1, tab2 = st.tabs(["Guidelines", "Data", "Theory"])
 tab0.subheader("Algorithm setting")
 tab0.markdown(
     """
-* **Distance Metric**: Distance metric used to measure how different the compressed texts are - only support normalised compressed distance at the moment.
-* **Classification algorithm**: Classification algorithm used to classify texts.
-* **Input number of neighbours**: Number of neighbours if KNN + compressed is chosen.
+* **Distance Metric**: Distance metric used to measure how different the compressed texts are - only support normalised compressed distance at the moment
+* **Classification algorithm**: Classification algorithm used to classify texts
+* **Input number of neighbours**: Number of neighbours if KNN + compressed is chosen
+* **Sample fraction**: Fraction to sample data points for EACH class - 1.00 sample fraction means no sampling
 """
 )
 
@@ -47,16 +47,27 @@ tab0.subheader("Workflow")
 tab0.markdown(
     """
 1. Toggle to the **Data** tab and upload two dataframes to be investigated
-2. Toggle to the **Analysis** tab to see the result of the detection
+2. Select text and target columns
+3. Select sample fraction if required - default is to sample 0.2 data points from EACH class
+4. Run algorithm and download prediction result if required
 """
 )
 
 tab0.subheader("Notes")
 tab0.markdown(
     """
-* Ensure each column in a dataframe has the right data format before being uploaded - the data type detection in the app is not perfect
-* Do not upload datetime columns - this will cause error 
-* The algorithm will ignore any column that **IS NOT** present in the reference dataframe
+* Ensure there is no missing value in a text column
+* Ensure all values in a text column are string
+* If the algorithm is too slow, use sample fraction 
+* If sample fraction does not work, consider chunking the dataset to be predicted
+"""
+)
+
+tab0.subheader("Disclaimer")
+tab0.markdown(
+    """
+* I DO NOT own nor create the original algorithms 
+* I DO NOT earn any money from this app - it is a hobby project 
 """
 )
 
@@ -122,9 +133,43 @@ if to_predict_file is not None and base_file is not None:
 
 # Tab 2 - Theory
 
-if to_predict_file is not None and base_file is not None:
-    tab2.markdown("###### Prediction result")
-    # tab2.dataframe(algo.final_predict_result)
+tab2.subheader("Summary")
+tab2.markdown(
+    """
+The algorithm centres around two ideas:
+* A compressor
+* A distance metric
 
+A compression algorithm compresses a particular data - usually images, into smaller bits. In this case however,
+we will be compressing texts instead. In general, compression algorithms can be categorised into
+two different groups:
 
+* A lossy compression that aims to minimise the size of the resulting compression at the cost of quality of the result
+* A losless compression that  aims to preserve quality of the resulting compression at the cost of size of the result
+
+In the context of a classification, a lossless compression algorithm is more suitable because it "preserves"
+the information in a text as much as possible. We can think of the compression algorithm as a preprocessing
+step prior to classification. In ML based classification task, usually we have to define a cost function
+that will be used by the ML algorithm to "learn" information about the data. The algorithm does this by
+trying different values of parameters that minimise a cost function. In the context of compressor based
+classification however, there are no parameters to be learned and cost functions. The classification is
+purely based on a distance metric. 
+
+The intuition is quite simple - consider the following scenario where we have three lines of text:
+
+* Text A -> topic A
+* Text B -> topic B
+* Text C -> topic ?
+
+[need to explain it better]
+
+"""
+)
+
+tab2.subheader("Research Paper")
+tab2.markdown(
+    """
+* [“Low-Resource” Text Classification: A Parameter-Free Classification Method with Compressors](https://aclanthology.org/2023.findings-acl.426) (Jiang et al., Findings 2023)
+"""
+)
     
