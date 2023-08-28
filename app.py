@@ -60,6 +60,7 @@ tab0.markdown(
 * Ensure all values in a text column are string
 * If the algorithm is too slow, use sample fraction 
 * If sample fraction does not work, consider chunking the dataset to be predicted
+* The algorithm uses *gzip* compressor 
 """
 )
 
@@ -68,6 +69,16 @@ tab0.markdown(
     """
 * I DO NOT own nor create the original algorithms 
 * I DO NOT earn any money from this app - it is a hobby project 
+"""
+)
+
+tab0.subheader("Future Improvements")
+tab0.markdown(
+    """
+* Add different distance metrics
+* Add different algorithms
+* Add different compressors
+* Add methods to validate result in the app
 """
 )
 
@@ -161,7 +172,17 @@ The intuition is quite simple - consider the following scenario where we have th
 * Text B -> topic B
 * Text C -> topic ?
 
-[need to explain it better]
+To classify "Text C", we must get a sense of how "similar" it is to the other two texts. This can be done through
+a distance metric. In this particular algorithm, we are using a distance metric called the 
+*Normalised Compression Distance*. This distance metric measures the extra "effort" needed to compress a particular
+line of text if it was combined with another line of text - how difficult it is to compress "Text A + Text C"
+compared to compressing "Text C" on its own? The lower the effort needed (or the distance), the more similar
+the two texts are. Simple KNN algorithm can then be used to classify the line of text once distance for every
+possible permutation has been calculated. 
+
+Given we must iterate through a list of text to be predicted and a list of 
+texts with known target class, the algorithm can be quite slow. It is in fact has a complexity of O(n^2). To tackle
+this challenge, this application uses the concept of multiprocessing. 
 
 """
 )

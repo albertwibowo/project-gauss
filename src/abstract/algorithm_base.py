@@ -8,7 +8,3 @@ class AlgorithmBase(ABC):
     @abstractmethod
     def run(self):
         ...
-
-    @abstractmethod
-    def save(self):
-        ...

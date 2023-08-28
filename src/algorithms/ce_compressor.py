@@ -8,7 +8,7 @@ from statistics import mode
 import multiprocessing as mp
 import itertools
 
-# TODO: add run method
+#TODO: too many duplicated code - can be abstracted
 class CeCompressor(AlgorithmBase):
 
     def __init__(self,
@@ -18,8 +18,18 @@ class CeCompressor(AlgorithmBase):
         self.base_df = base_df
         self.to_predict_df = to_predict_df
 
+    def run(self, text_col:str, target_col:str, 
+            sample_frac:float=1.0) -> pd.DataFrame:
+        """Method to run the algorithm.
 
-    def run(self, text_col:str, target_col:str, sample_frac:float=1.0):
+        Args:
+            text_col (str): The name of the text column.
+            target_col (str): The name of the target column.
+            sample_frac: (float): The sampling fraction - 1.0 means no sampling
+
+        Returns:
+            result_df (pd.DataFrame): result dataframe 
+        """
 
         temp_df = self.base_df.groupby(target_col).apply(lambda x: x.sample(frac=sample_frac)).reset_index(drop=True)
         temp_df[text_col] = temp_df[text_col].astype('str')
@@ -53,6 +63,3 @@ class CeCompressor(AlgorithmBase):
         result_df['prediction'] = preds
 
         return result_df
-
-    def save(self):
-        ...

@@ -1,7 +1,7 @@
 import gzip 
 
 def calculate_ce(text1:str, text2:str) -> float:
-    """Function to calculate normalised compression distance.
+    """Function to calculate cross entropy.
 
     The distance measure the 'effort' needed to change one
     text to another. The lower the value, the easier it 

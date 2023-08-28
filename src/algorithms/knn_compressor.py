@@ -6,7 +6,7 @@ import pandas as pd
 import multiprocessing as mp
 import itertools
 
-#TODO: add validation method based on scikit learn metrics
+#TODO: too many duplicated code - can be abstracted
 class KnnCompressor(AlgorithmBase):
     def __init__(self,
                  base_df: pd.DataFrame,
@@ -16,10 +16,19 @@ class KnnCompressor(AlgorithmBase):
         self.base_df = base_df
         self.to_predict_df = to_predict_df
     
-
-
     def run(self, text_col:str, target_col:str, 
-            k: int, sample_frac:float=1.0):
+            k: int, sample_frac:float=1.0) -> pd.DataFrame:
+        """Method to run the algorithm.
+
+        Args:
+            text_col (str): The name of the text column.
+            target_col (str): The name of the target column.
+            k (int): The number of neighbours to be considered.
+            sample_frac: (float): The sampling fraction - 1.0 means no sampling.
+
+        Returns:
+            result_df (pd.DataFrame): result dataframe 
+        """    
         
         temp_df = self.base_df.groupby(target_col).apply(lambda x: x.sample(frac=sample_frac)).reset_index(drop = True)
         temp_df[text_col] = temp_df[text_col].astype('str')
@@ -51,6 +60,3 @@ class KnnCompressor(AlgorithmBase):
         result_df['prediction'] = preds
 
         return result_df
-
-    def save(self):
-        ...

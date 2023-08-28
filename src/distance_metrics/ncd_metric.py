@@ -4,7 +4,7 @@ import gzip
 def calculate_ncd(text1:str, text2:str) -> float:
     """Function to calculate normalised compression distance.
 
-    The distance measure the 'effort' needed to change one
+    The distance measure the extra 'effort' needed to change one
     text to another. The lower the value, the easier it 
     is to convert text A -> text B. This means text B belong
     to the same class as text A.
