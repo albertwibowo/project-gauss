@@ -29,7 +29,7 @@ Two dataframes must be uploaded in order for the app to function:
 """)
 
 
-tab0, tab1, tab2 = st.tabs(["Guidelines", "Data", "Theory"])
+tab0, tab1, tab2, tab3 = st.tabs(["Guidelines", "Example", "Data", "Theory"])
 
 # Tab 0 - Guidelines
 
@@ -82,29 +82,49 @@ tab0.markdown(
 """
 )
 
+# Tab 1 - Data
 
+tab1.markdown("###### Dataframe example")
+tab1.markdown(
+    """
+To use this app, the dataframe must be in a specific format. This tab
+contains an example of the format of the dataframe. In general, the dataframe
+must consist of text and class columns.
+"""
+)
 
-# Tab 1 - Data 
+@st.cache_data
+def read_data(path:str):
+    df = pd.read_csv(path)
+    return df 
 
-tab1.markdown("###### Upload dataframes")
-to_predict_file = tab1.file_uploader("Choose to-predict dataframe")
-base_file = tab1.file_uploader("Choose base dataframe")
+tab1.markdown("###### Training dataframe example")
+tab1.dataframe(read_data('data/Poem_classification - train_data.csv'))
+
+tab1.markdown("###### Test dataframe example")
+tab1.dataframe(read_data('data/Poem_classification - test_data.csv'))
+
+# Tab 2 - Data 
+
+tab2.markdown("###### Upload dataframes")
+to_predict_file = tab2.file_uploader("Choose to-predict dataframe")
+base_file = tab2.file_uploader("Choose base dataframe")
 
 if to_predict_file is not None and base_file is not None:
     to_predict_df = pd.read_csv(to_predict_file)
     base_df = pd.read_csv(base_file)
 
-    tab1.markdown("##### Base dataframe")
-    tab1.dataframe(base_df)
+    tab2.markdown("##### Base dataframe")
+    tab2.dataframe(base_df)
 
-    tab1.markdown("##### To predict dataframe")
-    tab1.dataframe(to_predict_df)
+    tab2.markdown("##### To predict dataframe")
+    tab2.dataframe(to_predict_df)
 
-    text_col = tab1.selectbox(label="Please select a text column", 
+    text_col = tab2.selectbox(label="Please select a text column", 
                               options=base_df.columns)
-    target_col = tab1.selectbox(label="Please select a class column", 
+    target_col = tab2.selectbox(label="Please select a class column", 
                                 options=base_df.columns)
-    sample_frac = tab1.slider(label="Sample base dataframe?", 
+    sample_frac = tab2.slider(label="Sample base dataframe?", 
                                min_value=0.05, 
                                max_value=1.0, 
                                step=0.05,
@@ -112,7 +132,7 @@ if to_predict_file is not None and base_file is not None:
 
     if text_col and target_col:
 
-        run_button = tab1.button(label="Run algorithm", key="session_button")
+        run_button = tab2.button(label="Run algorithm", key="session_button")
         if run_button:
             
             if classification_algo == 'cross entropy + compressor':
@@ -133,19 +153,19 @@ if to_predict_file is not None and base_file is not None:
             else:
                 pass
 
-            tab1.markdown("##### Prediction result")
-            tab1.dataframe(result_df)
+            tab2.markdown("##### Prediction result")
+            tab2.dataframe(result_df)
 
-            tab1.download_button(label="download", 
+            tab2.download_button(label="download", 
                                        data=result_df.to_csv(index=False), 
                                        file_name="prediction.csv",
                                        mime="text/csv")
                 
 
-# Tab 2 - Theory
+# Tab 3 - Theory
 
-tab2.subheader("Summary")
-tab2.markdown(
+tab3.subheader("Summary")
+tab3.markdown(
     """
 The algorithm centres around two ideas:
 * A compressor
@@ -187,8 +207,8 @@ this challenge, this application uses the concept of multiprocessing.
 """
 )
 
-tab2.subheader("Research Paper")
-tab2.markdown(
+tab3.subheader("Research Paper")
+tab3.markdown(
     """
 * [“Low-Resource” Text Classification: A Parameter-Free Classification Method with Compressors](https://aclanthology.org/2023.findings-acl.426) (Jiang et al., Findings 2023)
 """
