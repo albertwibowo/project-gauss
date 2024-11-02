@@ -7,6 +7,7 @@ import pandas as pd
 from statistics import mode
 import multiprocessing as mp
 import itertools
+from src.utils import clean_text
 
 
 # TODO: too many duplicated code - can be abstracted
@@ -37,6 +38,13 @@ class CeCompressor(AlgorithmBase):
             .reset_index(drop=True)
         )
         temp_df[text_col] = temp_df[text_col].astype("str")
+
+        # clean text columns
+        temp_df[text_col] = temp_df[text_col].apply(clean_text)
+        self.to_predict_df[text_col] = self.to_predict_df[text_col].apply(
+            clean_text
+        )
+
         to_predict_list = self.to_predict_df[text_col].values.tolist()
 
         base_df_list = [d for _, d in temp_df.groupby(target_col)]

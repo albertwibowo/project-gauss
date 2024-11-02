@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import multiprocessing as mp
 import itertools
+from src.utils import clean_text
 
 
 # TODO: too many duplicated code - can be abstracted
@@ -35,6 +36,13 @@ class KnnCompressor(AlgorithmBase):
             .reset_index(drop=True)
         )
         temp_df[text_col] = temp_df[text_col].astype("str")
+
+        # clean text columns
+        temp_df[text_col] = temp_df[text_col].apply(clean_text)
+        self.to_predict_df[text_col] = self.to_predict_df[text_col].apply(
+            clean_text
+        )
+
         to_predict_list = self.to_predict_df[text_col].values.tolist()
         base_list = temp_df[text_col].values.tolist()
 

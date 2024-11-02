@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from src.algorithms.knn_compressor import KnnCompressor
 from src.algorithms.ce_compressor import CeCompressor
+from src.utils import calculate_f1_score
 
 # sidebar elements
 st.sidebar.write("Settings")
@@ -170,6 +171,41 @@ if to_predict_file is not None and base_file is not None:
                 pass
 
             tab2.markdown("##### Prediction result")
+
+            # show metrics
+            tab2.markdown("F1 score")
+            col1, col2, col3 = tab2.columns(3)
+
+            f1_micro = round(
+                calculate_f1_score(
+                    y_true=result_df["Genre"],
+                    y_pred=result_df["prediction"],
+                    type="micro",
+                ),
+                2,
+            )
+            f1_macro = round(
+                calculate_f1_score(
+                    y_true=result_df["Genre"],
+                    y_pred=result_df["prediction"],
+                    type="macro",
+                ),
+                2,
+            )
+            f1_weighted = round(
+                calculate_f1_score(
+                    y_true=result_df["Genre"],
+                    y_pred=result_df["prediction"],
+                    type="weighted",
+                ),
+                2,
+            )
+
+            col1.metric("F1 Score Micro", f1_micro)
+            col2.metric("F1 Score Macro", f1_macro)
+            col3.metric("F1 Score Weighted", f1_weighted)
+
+            tab2.markdown("Prediction")
             tab2.dataframe(result_df)
 
             tab2.download_button(
