@@ -1,20 +1,23 @@
-import streamlit as st 
-import pandas as pd 
+import streamlit as st
+import pandas as pd
 from src.algorithms.knn_compressor import KnnCompressor
 from src.algorithms.ce_compressor import CeCompressor
 
 # sidebar elements
 st.sidebar.write("Settings")
 
-distance_metric = st.sidebar.selectbox(label="Select distance metric",
-                                     options=['normalised compressed distance'])
-classification_algo = st.sidebar.selectbox(label="Select classification algorithm",
-                                     options=['knn + compressor',
-                                              'cross entropy + compressor'])
+distance_metric = st.sidebar.selectbox(
+    label="Select distance metric", options=["normalised compressed distance"]
+)
+classification_algo = st.sidebar.selectbox(
+    label="Select classification algorithm",
+    options=["knn + compressor", "cross entropy + compressor"],
+)
 
-if classification_algo == 'knn + compressor':
-    n_neighbours = st.sidebar.number_input(label="Input number of neighbours", min_value=1,
-                                           value=5, step=1)
+if classification_algo == "knn + compressor":
+    n_neighbours = st.sidebar.number_input(
+        label="Input number of neighbours", min_value=1, value=5, step=1
+    )
 
 # main page
 st.title("Compressor based text classification")
@@ -26,7 +29,8 @@ Two dataframes must be uploaded in order for the app to function:
 * base dataframe: this is the "training" dataframe
 * to-predict dataframe: this is the dataframe to be predicted
 
-""")
+"""
+)
 
 
 tab0, tab1, tab2, tab3 = st.tabs(["Guidelines", "Example", "Data", "Theory"])
@@ -58,17 +62,17 @@ tab0.markdown(
     """
 * Ensure there is no missing value in a text column
 * Ensure all values in a text column are string
-* If the algorithm is too slow, use sample fraction 
+* If the algorithm is too slow, use sample fraction
 * If sample fraction does not work, consider chunking the dataset to be predicted
-* The algorithm uses *gzip* compressor 
+* The algorithm uses *gzip* compressor
 """
 )
 
 tab0.subheader("Disclaimer")
 tab0.markdown(
     """
-* I DO NOT own nor create the original algorithms 
-* I DO NOT earn any money from this app - it is a hobby project 
+* I DO NOT own nor create the original algorithms
+* I DO NOT earn any money from this app - it is a hobby project
 """
 )
 
@@ -93,18 +97,20 @@ must consist of text and class columns.
 """
 )
 
+
 @st.cache_data
-def read_data(path:str):
+def read_data(path: str):
     df = pd.read_csv(path)
-    return df 
+    return df
+
 
 tab1.markdown("###### Training dataframe example")
-tab1.dataframe(read_data('data/Poem_classification - train_data.csv'))
+tab1.dataframe(read_data("data/Poem_classification - train_data.csv"))
 
 tab1.markdown("###### Test dataframe example")
-tab1.dataframe(read_data('data/Poem_classification - test_data.csv'))
+tab1.dataframe(read_data("data/Poem_classification - test_data.csv"))
 
-# Tab 2 - Data 
+# Tab 2 - Data
 
 tab2.markdown("###### Upload dataframes")
 to_predict_file = tab2.file_uploader("Choose to-predict dataframe")
@@ -120,47 +126,59 @@ if to_predict_file is not None and base_file is not None:
     tab2.markdown("##### To predict dataframe")
     tab2.dataframe(to_predict_df)
 
-    text_col = tab2.selectbox(label="Please select a text column", 
-                              options=base_df.columns)
-    target_col = tab2.selectbox(label="Please select a class column", 
-                                options=base_df.columns)
-    sample_frac = tab2.slider(label="Sample base dataframe?", 
-                               min_value=0.05, 
-                               max_value=1.0, 
-                               step=0.05,
-                               value=0.2)
+    text_col = tab2.selectbox(
+        label="Please select a text column", options=base_df.columns
+    )
+    target_col = tab2.selectbox(
+        label="Please select a class column", options=base_df.columns
+    )
+    sample_frac = tab2.slider(
+        label="Sample base dataframe?",
+        min_value=0.05,
+        max_value=1.0,
+        step=0.05,
+        value=0.2,
+    )
 
     if text_col and target_col:
 
         run_button = tab2.button(label="Run algorithm", key="session_button")
         if run_button:
-            
-            if classification_algo == 'cross entropy + compressor':
-                algo = CeCompressor(base_df=base_df,
-                        to_predict_df=to_predict_df)
-                result_df = algo.run(text_col=text_col, 
-                                    target_col=target_col,
-                                    sample_frac=sample_frac)
-            
-            elif classification_algo == 'knn + compressor':
-                algo = KnnCompressor(base_df=base_df,
-                        to_predict_df=to_predict_df)
-                result_df = algo.run(text_col=text_col, 
-                                     target_col=target_col,
-                                     k=n_neighbours,
-                                     sample_frac=sample_frac)
-            
+
+            if classification_algo == "cross entropy + compressor":
+                algo = CeCompressor(
+                    base_df=base_df, to_predict_df=to_predict_df
+                )
+                result_df = algo.run(
+                    text_col=text_col,
+                    target_col=target_col,
+                    sample_frac=sample_frac,
+                )
+
+            elif classification_algo == "knn + compressor":
+                algo = KnnCompressor(
+                    base_df=base_df, to_predict_df=to_predict_df
+                )
+                result_df = algo.run(
+                    text_col=text_col,
+                    target_col=target_col,
+                    k=n_neighbours,
+                    sample_frac=sample_frac,
+                )
+
             else:
                 pass
 
             tab2.markdown("##### Prediction result")
             tab2.dataframe(result_df)
 
-            tab2.download_button(label="download", 
-                                       data=result_df.to_csv(index=False), 
-                                       file_name="prediction.csv",
-                                       mime="text/csv")
-                
+            tab2.download_button(
+                label="download",
+                data=result_df.to_csv(index=False),
+                file_name="prediction.csv",
+                mime="text/csv",
+            )
+
 
 # Tab 3 - Theory
 
@@ -184,7 +202,7 @@ step prior to classification. In ML based classification task, usually we have t
 that will be used by the ML algorithm to "learn" information about the data. The algorithm does this by
 trying different values of parameters that minimise a cost function. In the context of compressor based
 classification however, there are no parameters to be learned and cost functions. The classification is
-purely based on a distance metric. 
+purely based on a distance metric.
 
 The intuition is quite simple - consider the following scenario where we have three lines of text:
 
@@ -193,16 +211,16 @@ The intuition is quite simple - consider the following scenario where we have th
 * Text C -> topic ?
 
 To classify "Text C", we must get a sense of how "similar" it is to the other two texts. This can be done through
-a distance metric. In this particular algorithm, we are using a distance metric called the 
+a distance metric. In this particular algorithm, we are using a distance metric called the
 *Normalised Compression Distance*. This distance metric measures the extra "effort" needed to compress a particular
 line of text if it was combined with another line of text - how difficult it is to compress "Text A + Text C"
 compared to compressing "Text C" on its own? The lower the effort needed (or the distance), the more similar
 the two texts are. Simple KNN algorithm can then be used to classify the line of text once distance for every
-possible permutation has been calculated. 
+possible permutation has been calculated.
 
-Given we must iterate through a list of text to be predicted and a list of 
+Given we must iterate through a list of text to be predicted and a list of
 texts with known target class, the algorithm can be quite slow. It is in fact has a complexity of O(n^2). To tackle
-this challenge, this application uses the concept of multiprocessing. 
+this challenge, this application uses the concept of multiprocessing.
 
 """
 )
@@ -213,4 +231,3 @@ tab3.markdown(
 * [“Low-Resource” Text Classification: A Parameter-Free Classification Method with Compressors](https://aclanthology.org/2023.findings-acl.426) (Jiang et al., Findings 2023)
 """
 )
-    

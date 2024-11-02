@@ -1,10 +1,11 @@
-import gzip 
+import gzip
 
-def calculate_ce(text1:str, text2:str) -> float:
+
+def calculate_ce(text1: str, text2: str) -> float:
     """Function to calculate cross entropy.
 
     The distance measure the 'effort' needed to change one
-    text to another. The lower the value, the easier it 
+    text to another. The lower the value, the easier it
     is to convert text A -> text B. This means text B belong
     to the same class as text A.
 
@@ -13,7 +14,7 @@ def calculate_ce(text1:str, text2:str) -> float:
         text2 (str): A text.
 
     Returns:
-        distance (float): cross entory distance 
+        distance (float): cross entory distance
     """
     text1 = str(text1)
     text2 = str(text2)
