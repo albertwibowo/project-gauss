@@ -178,7 +178,7 @@ if to_predict_file is not None and base_file is not None:
 
             f1_micro = round(
                 calculate_f1_score(
-                    y_true=result_df["Genre"],
+                    y_true=result_df[target_col],
                     y_pred=result_df["prediction"],
                     type="micro",
                 ),
@@ -186,7 +186,7 @@ if to_predict_file is not None and base_file is not None:
             )
             f1_macro = round(
                 calculate_f1_score(
-                    y_true=result_df["Genre"],
+                    y_true=result_df[target_col],
                     y_pred=result_df["prediction"],
                     type="macro",
                 ),
@@ -194,7 +194,7 @@ if to_predict_file is not None and base_file is not None:
             )
             f1_weighted = round(
                 calculate_f1_score(
-                    y_true=result_df["Genre"],
+                    y_true=result_df[target_col],
                     y_pred=result_df["prediction"],
                     type="weighted",
                 ),
